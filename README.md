@@ -198,3 +198,69 @@ This project focuses on deploying a comprehensive threat detection lab in Azure 
 ---
 
 This section outlines the steps to detect and prevent LSASS credential dumping attacks using Sliver and LimaCharlie.
+
+## Alerting via Slack
+
+### Overview
+
+This guide outlines the process of configuring Slack to receive detections from LimaCharlie. It includes creating a Slack app, setting permissions, inviting the bot to a channel, and configuring output settings in LimaCharlie. The final step ensures that detections are sent to the specified Slack channel.
+
+### Steps to Configure Slack Integration
+
+1. **Create a Slack App:**
+   - Visit the [Slack API: Applications](https://api.slack.com/apps) page.
+   - Click “Create New App” and choose a name and workspace for your app.
+   - After creating the app, navigate to the “OAuth & Permissions” section to set up the necessary permissions.
+
+2. **Set Permissions for the Slack Bot:**
+   - In the “OAuth & Permissions” section, add the following OAuth scopes:
+     - `chat:write` (to send messages)
+     - `chat:write.public` (if you need to post in public channels)
+     - Any additional scopes required for your use case.
+   - Install the app to your workspace to generate the bot token.
+
+3. **Invite the Bot to a Slack Channel:**
+   - Go to your Slack workspace and find the channel where you want to receive alerts.
+   - Type `/invite @your-bot-name` in the channel to invite the bot.
+
+4. **Configure Outputs in LimaCharlie:**
+   - Visit the LimaCharlie documentation to explore output modules related to Slack integration.
+   - Log in to LimaCharlie and select the organization where you want to configure the output.
+   - Go to the "Outputs" section and create a new output.
+   - Select the Slack module for the output.
+
+5. **Enter API Token and Channel Name:**
+   - In the output configuration, enter the Slack API token you obtained from the Slack app settings.
+   - Provide the Slack channel name where the detections should be sent.
+
+6. **Save and Test the Configuration:**
+   - Save your output configuration in LimaCharlie.
+   - Test the integration by generating a test detection or alert to ensure that it is sent to the Slack channel.
+
+### Additional Information
+
+- **How do I create a Slack app?**
+  - Refer to the Slack API documentation on [creating an app](https://api.slack.com/apps).
+
+- **What permissions are needed for the Slack bot?**
+  - Ensure the bot has `chat:write` and any other necessary scopes for your use case.
+
+- **How can I configure outputs in LimaCharlie?**
+  - Check LimaCharlie’s [output configuration documentation](https://docs.limacharlie.io/docs/outputs) for detailed steps.
+
+### Highlights
+
+- **Connecting LimaCharlie to Slack:**
+  - This process involves provisioning a Slack app, configuring permissions, and setting up output modules in LimaCharlie.
+  
+- **Configuration Steps:**
+  - Creating the Slack app with the necessary permissions.
+  - Inviting the bot to the desired Slack channel.
+  - Configuring outputs in LimaCharlie to route detections to Slack.
+
+- **Effective Communication:**
+  - Proper configuration ensures timely updates and alerts are sent directly to your Slack channel, enhancing your threat detection and response capabilities.
+
+---
+
+This guide ensures that you can effectively integrate Slack with LimaCharlie for real-time alerting and monitoring.
